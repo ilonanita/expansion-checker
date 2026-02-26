@@ -5,34 +5,31 @@ import os
 
 st.set_page_config(page_title="Expansion Alignment Checker", layout="centered")
 
-# --- Calm Green Theme Override ---
+# --- Remove radio pill background while keeping green accent ---
 st.markdown("""
 <style>
-.stApp {
-    background-color: #f4fbf4;
+
+/* Remove pill-style highlight behind selected radio label */
+div[role="radiogroup"] label {
+    background-color: transparent !important;
 }
 
-/* Radio button color override */
-div[role="radiogroup"] input:checked + div {
-    background-color: #2e7d32 !important;
-    border-color: #2e7d32 !important;
-}
-
-/* Remove default red focus */
-div[role="radiogroup"] input:focus + div {
-    box-shadow: none !important;
-}
-
-/* Make radio layout horizontal */
+/* Keep radio layout horizontal clean */
 div[data-baseweb="radio"] > div {
     flex-direction: row;
 }
 
-/* Enlarge dot display */
+/* Make dots larger and spaced */
 div[role="radiogroup"] > label {
-    font-size: 28px;
+    font-size: 26px;
     padding: 0 10px;
 }
+
+/* Keep text clean black */
+div[role="radiogroup"] label span {
+    color: black !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -41,7 +38,7 @@ st.markdown("**Does this multiply your life or maintain shrinkage?**")
 
 DATA_FILE = "data.csv"
 
-# --- MODE FIRST (default to General Expansion) ---
+# --- MODE FIRST ---
 mode = st.radio(
     "Mode",
     ["General Expansion", "Relationship"],
@@ -61,23 +58,21 @@ person = st.text_input("Person involved (if any)")
 
 st.divider()
 
-# --- SINGLE DOT RATING FUNCTION ---
+# --- DOT RATING FUNCTION ---
 def dot_rating(label, help_text):
     st.markdown(f"**{label}**")
     st.caption(help_text)
 
     value = st.radio(
         "",
-        [1,2,3,4,5],
-        index=2,  # default = 3 (neutral)
+        [1, 2, 3, 4, 5],
+        index=2,  # default to neutral (3)
         horizontal=True,
-        format_func=lambda x: "●" if x == 3 else "○",
-        key=label
+        format_func=lambda x: "○"
     )
 
     return value
 
-# --- BASELINE ---
 baseline = dot_rating(
     "Baseline",
     "How do I feel right now? (1 = reactive | 5 = calm and clear)"
@@ -114,7 +109,7 @@ notes = st.text_area("Notes (optional)")
 
 st.divider()
 
-# --- SAVE ---
+# --- SAVE ENTRY ---
 if st.button("Save Entry"):
     if description == "":
         st.warning("Please add a short description.")
