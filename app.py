@@ -5,14 +5,32 @@ import os
 
 st.set_page_config(page_title="Expansion Alignment Checker", layout="centered")
 
-st.title("🔥 Expansion Alignment Checker")
+# --- Soft Green Background ---
+st.markdown("""
+<style>
+.stApp {
+    background-color: #f4fbf4;
+}
+div[data-baseweb="radio"] > div {
+    flex-direction: row;
+}
+div[role="radiogroup"] > label {
+    font-size: 28px;
+    padding: 0 10px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.title("Expansion Alignment Checker")
 st.markdown("**Does this multiply your life or maintain shrinkage?**")
 
 DATA_FILE = "data.csv"
 
-# --- INPUT SECTION ---
+# --- MODE FIRST ---
+mode = st.radio("Mode", ["General Expansion", "Relationship"], horizontal=True)
 
-description = st.text_input("What is this about? (short description)", max_chars=150)
+# --- CONTEXT ---
+description = st.text_input("What is this about?", max_chars=150)
 
 category = st.selectbox(
     "Category",
@@ -21,23 +39,62 @@ category = st.selectbox(
 
 person = st.text_input("Person involved (if any)")
 
-mode = st.radio("Mode:", ["General Expansion", "Relationship"])
+st.divider()
 
-baseline = st.slider("How do I feel right now (before scoring)?", 0, 2, 1,
-                     help="0 = calm, 1 = slightly reactive, 2 = irritated/triggered")
+# --- SINGLE DOT RATING FUNCTION ---
+def dot_rating(label, help_text):
+    st.markdown(f"**{label}**")
+    st.caption(help_text)
 
-spark = st.slider("🔥 Spark", 0, 2, 1)
-growth = st.slider("🌱 Growth", 0, 2, 1)
-energy = st.slider("⚡ Energy", 0, 2, 1)
-agency = st.slider("🧭 Agency", 0, 2, 1)
-trajectory = st.slider("🚀 Trajectory Alignment", 0, 2, 1)
+    value = st.radio(
+        "",
+        [1,2,3,4,5],
+        horizontal=True,
+        format_func=lambda x: "○",
+        key=label
+    )
+
+    return value
+
+# --- BASELINE ---
+baseline = dot_rating(
+    "Baseline",
+    "How do I feel right now? (1 = reactive | 5 = calm and clear)"
+)
+
+spark = dot_rating(
+    "🔥 Spark",
+    "Does this ignite intellectual, emotional, or sensual aliveness?"
+)
+
+growth = dot_rating(
+    "🌱 Growth",
+    "Does this stretch me or move me forward?"
+)
+
+energy = dot_rating(
+    "⚡ Energy",
+    "Do I feel energised (not drained) thinking about engaging?"
+)
+
+agency = dot_rating(
+    "🧭 Agency",
+    "Am I choosing this freely — not from guilt or pressure?"
+)
+
+trajectory = dot_rating(
+    "🚀 Trajectory Alignment",
+    "Does this align with the woman I am becoming?"
+)
 
 over_functioning = st.checkbox("Am I over-functioning here?")
 
 notes = st.text_area("Notes (optional)")
 
-if st.button("Save Entry"):
+st.divider()
 
+# --- SAVE ---
+if st.button("Save Entry"):
     if description == "":
         st.warning("Please add a short description.")
     else:
@@ -45,10 +102,10 @@ if st.button("Save Entry"):
 
         entry = {
             "date": datetime.datetime.now(),
+            "mode": mode,
             "description": description,
             "category": category,
             "person": person,
-            "mode": mode,
             "baseline": baseline,
             "spark": spark,
             "growth": growth,
@@ -67,44 +124,31 @@ if st.button("Save Entry"):
         else:
             df.to_csv(DATA_FILE, index=False)
 
-        st.success("Entry saved!")
+        st.success("Entry saved.")
 
-# --- ANALYTICS SECTION ---
-
-st.header("📊 Trend Dashboard")
+# --- ANALYTICS ---
+st.header("Trend Overview")
 
 if os.path.exists(DATA_FILE):
     df = pd.read_csv(DATA_FILE)
     df["date"] = pd.to_datetime(df["date"])
 
-    # Overall trend
-    st.subheader("Overall Expansion Score Over Time")
     st.line_chart(df.set_index("date")["total"])
 
     avg_score = round(df["total"].mean(), 2)
-    st.write(f"**Average Score:** {avg_score}")
+    st.write(f"Average Expansion Score: {avg_score}")
 
-    # Category analysis
-    st.subheader("Average Score by Category")
+    st.subheader("By Category")
     cat_avg = df.groupby("category")["total"].mean().sort_values(ascending=False)
     st.bar_chart(cat_avg)
 
-    # Person analysis
     if df["person"].str.strip().any():
-        st.subheader("Average Score by Person")
+        st.subheader("By Person")
         person_avg = df[df["person"] != ""].groupby("person")["total"].mean().sort_values(ascending=False)
         st.bar_chart(person_avg)
 
-    # Over-functioning frequency
-    st.subheader("Over-Functioning Frequency")
     of_rate = df["over_functioning"].mean() * 100
-    st.write(f"{round(of_rate, 1)}% of entries involve over-functioning.")
-
-    # Pattern alerts
-    if avg_score <= 4:
-        st.warning("⚠ Pattern of depletion detected.")
-    elif avg_score >= 7:
-        st.success("🔥 Strong expansion trend.")
+    st.write(f"Over-functioning appears in {round(of_rate,1)}% of entries.")
 
 else:
     st.info("No entries yet.")
