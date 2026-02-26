@@ -5,15 +5,30 @@ import os
 
 st.set_page_config(page_title="Expansion Alignment Checker", layout="centered")
 
-# --- Soft Green Background ---
+# --- Calm Green Theme Override ---
 st.markdown("""
 <style>
 .stApp {
     background-color: #f4fbf4;
 }
+
+/* Radio button color override */
+div[role="radiogroup"] input:checked + div {
+    background-color: #2e7d32 !important;
+    border-color: #2e7d32 !important;
+}
+
+/* Remove default red focus */
+div[role="radiogroup"] input:focus + div {
+    box-shadow: none !important;
+}
+
+/* Make radio layout horizontal */
 div[data-baseweb="radio"] > div {
     flex-direction: row;
 }
+
+/* Enlarge dot display */
 div[role="radiogroup"] > label {
     font-size: 28px;
     padding: 0 10px;
@@ -26,8 +41,13 @@ st.markdown("**Does this multiply your life or maintain shrinkage?**")
 
 DATA_FILE = "data.csv"
 
-# --- MODE FIRST ---
-mode = st.radio("Mode", ["General Expansion", "Relationship"], horizontal=True)
+# --- MODE FIRST (default to General Expansion) ---
+mode = st.radio(
+    "Mode",
+    ["General Expansion", "Relationship"],
+    horizontal=True,
+    index=0
+)
 
 # --- CONTEXT ---
 description = st.text_input("What is this about?", max_chars=150)
@@ -49,8 +69,9 @@ def dot_rating(label, help_text):
     value = st.radio(
         "",
         [1,2,3,4,5],
+        index=2,  # default = 3 (neutral)
         horizontal=True,
-        format_func=lambda x: "○",
+        format_func=lambda x: "●" if x == 3 else "○",
         key=label
     )
 
