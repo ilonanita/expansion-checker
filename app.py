@@ -5,7 +5,7 @@ import os
 
 st.set_page_config(page_title="Expansion Alignment Checker", layout="centered")
 
-# --- SPACING + CLEAN RADIO STYLE ---
+# --- Clean Styling + Precise Spacing ---
 st.markdown("""
 <style>
 
@@ -14,32 +14,41 @@ div[role="radiogroup"] input {
     display: none;
 }
 
-/* Make radio horizontal */
+/* Horizontal radio */
 div[data-baseweb="radio"] > div {
     flex-direction: row;
 }
 
-/* Tighten caption spacing */
-div[data-testid="stCaptionContainer"] {
+/* Remove extra spacing from markdown */
+div[data-testid="stMarkdownContainer"] p {
     margin-bottom: 0.2rem;
 }
 
-/* Tighten space above radio group */
-div[role="radiogroup"] {
-    margin-top: 0rem;
-    margin-bottom: 1.5rem;  /* bigger gap before next block */
+/* Remove extra spacing from captions */
+div[data-testid="stCaptionContainer"] {
+    margin-bottom: 0.3rem;
 }
 
-/* Slightly enlarge numbers */
+/* Tight radio spacing */
+div[role="radiogroup"] {
+    margin-top: 0rem;
+    margin-bottom: 0rem;
+}
+
+/* Larger spacing AFTER each rating block */
+.block-spacer {
+    height: 1.8rem;
+}
+
+/* Clean radio labels */
+div[role="radiogroup"] label {
+    background-color: transparent !important;
+}
+
 div[role="radiogroup"] label span {
     font-size: 20px;
     padding: 0 10px;
     color: black !important;
-}
-
-/* Remove radio pill background */
-div[role="radiogroup"] label {
-    background-color: transparent !important;
 }
 
 </style>
@@ -70,7 +79,7 @@ person = st.text_input("Person involved (if any)")
 st.divider()
 
 def rating_block(label, help_text, key_name):
-    st.markdown(f"**{label}**")
+    st.markdown(f"### {label}")
     st.caption(help_text)
 
     value = st.radio(
@@ -80,6 +89,10 @@ def rating_block(label, help_text, key_name):
         horizontal=True,
         key=key_name
     )
+
+    # Spacer AFTER full block
+    st.markdown('<div class="block-spacer"></div>', unsafe_allow_html=True)
+
     return value
 
 baseline = rating_block(
