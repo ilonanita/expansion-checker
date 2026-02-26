@@ -32,11 +32,22 @@ client = gspread.authorize(creds)
 sheet = client.open_by_key(SHEET_ID).sheet1
 
 # -------------------------------
-# SUCCESS MESSAGE AT TOP
+# SUCCESS MESSAGE + SCROLL RESET
 # -------------------------------
 
 if st.session_state.saved_flag:
     st.success("Entry saved.")
+
+    # Force scroll to top
+    st.markdown(
+        """
+        <script>
+            window.scrollTo(0, 0);
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+
     st.session_state.saved_flag = False
 
 # -------------------------------
