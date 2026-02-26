@@ -155,4 +155,4 @@ if submitted:
 
         sheet.append_row(row)
 
-        st.rerun()
+st.success("Entry saved.")
