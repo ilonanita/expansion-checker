@@ -24,95 +24,91 @@ creds = Credentials.from_service_account_info(
 )
 
 client = gspread.authorize(creds)
-
-# Open your sheet
 sheet = client.open("Expansion Checker Data").sheet1
 
 # -------------------------------
-# INPUT SECTION
+# FORM
 # -------------------------------
 
-mode = st.radio(
-    "Mode",
-    ["General Expansion", "Relationship"],
-    horizontal=True,
-    index=0,
-    key="mode"
-)
+with st.form("entry_form", clear_on_submit=True):
 
-description = st.text_input("What is this about?", max_chars=150)
-
-category = st.selectbox(
-    "Category",
-    ["Romantic", "Friend", "Work", "Family", "Social Event", "Solo", "Opportunity", "Other"]
-)
-
-person = st.text_input("Person involved (if any)")
-
-st.divider()
-
-def rating_block(label, help_text, key_name):
-    st.markdown(f"**{label}**")
-    st.markdown(f"<span style='font-size:14px;color:#555;'>{help_text}</span>", unsafe_allow_html=True)
-
-    value = st.radio(
-        "",
-        [1,2,3,4,5],
-        index=2,
+    mode = st.radio(
+        "Mode",
+        ["General Expansion", "Relationship"],
         horizontal=True,
-        key=key_name
+        index=0,
     )
 
-    st.markdown("<hr style='margin:10px 0;'>", unsafe_allow_html=True)
+    description = st.text_input("What is this about?", max_chars=150)
 
-    return value
+    category = st.selectbox(
+        "Category",
+        ["Romantic", "Friend", "Work", "Family", "Social Event", "Solo", "Opportunity", "Other"]
+    )
 
-baseline = rating_block(
-    "Baseline",
-    "How do I feel right now? (1 = reactive | 5 = energised)",
-    "baseline"
-)
+    person = st.text_input("Person involved (if any)")
 
-spark = rating_block(
-    "🔥 Spark",
-    "Does this ignite intellectual, emotional, or sensual aliveness?",
-    "spark"
-)
+    st.divider()
 
-growth = rating_block(
-    "🌱 Growth",
-    "Does this stretch me or move me forward?",
-    "growth"
-)
+    def rating_block(label, help_text):
+        st.markdown(f"**{label}**")
+        st.markdown(
+            f"<span style='font-size:14px;color:#555;'>{help_text}</span>",
+            unsafe_allow_html=True
+        )
 
-energy = rating_block(
-    "⚡ Energy",
-    "Do I feel energised (not drained)?",
-    "energy"
-)
+        value = st.radio(
+            "",
+            [1, 2, 3, 4, 5],
+            index=2,
+            horizontal=True
+        )
 
-agency = rating_block(
-    "🧭 Agency",
-    "Am I choosing this freely — not from guilt or pressure?",
-    "agency"
-)
+        st.markdown("<hr style='margin:10px 0;'>", unsafe_allow_html=True)
 
-trajectory = rating_block(
-    "🚀 Trajectory Alignment",
-    "Does this align with the woman I am becoming?",
-    "trajectory"
-)
+        return value
 
-over_functioning = st.checkbox("Am I over-functioning here?")
-notes = st.text_area("Notes (optional)")
+    baseline = rating_block(
+        "Baseline",
+        "How do I feel right now? (1 = reactive | 5 = energised)"
+    )
 
-st.divider()
+    spark = rating_block(
+        "🔥 Spark",
+        "Does this ignite intellectual, emotional, or sensual aliveness?"
+    )
+
+    growth = rating_block(
+        "🌱 Growth",
+        "Does this stretch me or move me forward?"
+    )
+
+    energy = rating_block(
+        "⚡ Energy",
+        "Do I feel energised (not drained)?"
+    )
+
+    agency = rating_block(
+        "🧭 Agency",
+        "Am I choosing this freely — not from guilt or pressure?"
+    )
+
+    trajectory = rating_block(
+        "🚀 Trajectory Alignment",
+        "Does this align with the woman I am becoming?"
+    )
+
+    over_functioning = st.checkbox("Am I over-functioning here?")
+    notes = st.text_area("Notes (optional)")
+
+    submitted = st.form_submit_button("Save Entry")
 
 # -------------------------------
-# SAVE ENTRY TO GOOGLE SHEETS
+# SAVE TO GOOGLE SHEETS
 # -------------------------------
 
-if st.button("Save Entry"):
+if submitted:
+
     if description == "":
         st.warning("Please add a short description.")
     else:
@@ -137,4 +133,5 @@ if st.button("Save Entry"):
 
         sheet.append_row(row)
 
-        st.success("Entry saved to Google Sheets.")
+        # Immediate rerun = clean reset
+        st.rerun()
