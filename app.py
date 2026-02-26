@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 import datetime
 import gspread
 from google.oauth2.service_account import Credentials
@@ -37,20 +36,29 @@ with st.form("entry_form", clear_on_submit=True):
         ["General Expansion", "Relationship"],
         horizontal=True,
         index=0,
+        key="mode"
     )
 
-    description = st.text_input("What is this about?", max_chars=150)
+    description = st.text_input(
+        "What is this about?",
+        max_chars=150,
+        key="description"
+    )
 
     category = st.selectbox(
         "Category",
-        ["Romantic", "Friend", "Work", "Family", "Social Event", "Solo", "Opportunity", "Other"]
+        ["Romantic", "Friend", "Work", "Family", "Social Event", "Solo", "Opportunity", "Other"],
+        key="category"
     )
 
-    person = st.text_input("Person involved (if any)")
+    person = st.text_input(
+        "Person involved (if any)",
+        key="person"
+    )
 
     st.divider()
 
-    def rating_block(label, help_text):
+    def rating_block(label, help_text, key_name):
         st.markdown(f"**{label}**")
         st.markdown(
             f"<span style='font-size:14px;color:#555;'>{help_text}</span>",
@@ -58,10 +66,11 @@ with st.form("entry_form", clear_on_submit=True):
         )
 
         value = st.radio(
-            "",
+            label,
             [1, 2, 3, 4, 5],
             index=2,
-            horizontal=True
+            horizontal=True,
+            key=key_name
         )
 
         st.markdown("<hr style='margin:10px 0;'>", unsafe_allow_html=True)
@@ -70,36 +79,49 @@ with st.form("entry_form", clear_on_submit=True):
 
     baseline = rating_block(
         "Baseline",
-        "How do I feel right now? (1 = reactive | 5 = energised)"
+        "How do I feel right now? (1 = reactive | 5 = energised)",
+        "baseline"
     )
 
     spark = rating_block(
         "🔥 Spark",
-        "Does this ignite intellectual, emotional, or sensual aliveness?"
+        "Does this ignite intellectual, emotional, or sensual aliveness?",
+        "spark"
     )
 
     growth = rating_block(
         "🌱 Growth",
-        "Does this stretch me or move me forward?"
+        "Does this stretch me or move me forward?",
+        "growth"
     )
 
     energy = rating_block(
         "⚡ Energy",
-        "Do I feel energised (not drained)?"
+        "Do I feel energised (not drained)?",
+        "energy"
     )
 
     agency = rating_block(
         "🧭 Agency",
-        "Am I choosing this freely — not from guilt or pressure?"
+        "Am I choosing this freely — not from guilt or pressure?",
+        "agency"
     )
 
     trajectory = rating_block(
         "🚀 Trajectory Alignment",
-        "Does this align with the woman I am becoming?"
+        "Does this align with the woman I am becoming?",
+        "trajectory"
     )
 
-    over_functioning = st.checkbox("Am I over-functioning here?")
-    notes = st.text_area("Notes (optional)")
+    over_functioning = st.checkbox(
+        "Am I over-functioning here?",
+        key="over_functioning"
+    )
+
+    notes = st.text_area(
+        "Notes (optional)",
+        key="notes"
+    )
 
     submitted = st.form_submit_button("Save Entry")
 
@@ -133,5 +155,4 @@ if submitted:
 
         sheet.append_row(row)
 
-        # Immediate rerun = clean reset
         st.rerun()
