@@ -1,60 +1,36 @@
 import streamlit as st
 import pandas as pd
 import datetime
-import os
+import gspread
+from google.oauth2.service_account import Credentials
 
 st.set_page_config(page_title="Expansion Alignment Checker", layout="centered")
-
-# --- Compact Mobile Styling ---
-st.markdown("""
-<style>
-
-/* Remove radio circle */
-div[role="radiogroup"] input {
-    display: none;
-}
-
-/* Horizontal radio */
-div[data-baseweb="radio"] > div {
-    flex-direction: row;
-}
-
-/* Tighten all markdown spacing */
-div[data-testid="stMarkdownContainer"] p {
-    margin-bottom: 0.2rem;
-    margin-top: 0.2rem;
-}
-
-/* Tighten radio spacing */
-div[role="radiogroup"] {
-    margin-top: 0.2rem;
-    margin-bottom: 0.4rem;
-}
-
-/* Clean radio labels */
-div[role="radiogroup"] label {
-    background-color: transparent !important;
-}
-
-div[role="radiogroup"] label span {
-    font-size: 18px;
-    padding: 0 8px;
-    color: black !important;
-}
-
-/* Thin divider line */
-.compact-divider {
-    border-top: 1px solid #dcdcdc;
-    margin: 0.8rem 0 0.8rem 0;
-}
-
-</style>
-""", unsafe_allow_html=True)
 
 st.title("Expansion Alignment Checker")
 st.markdown("Does this multiply your life or maintain shrinkage?")
 
-DATA_FILE = "data.csv"
+# -------------------------------
+# GOOGLE SHEETS CONNECTION
+# -------------------------------
+
+scope = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+
+creds = Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"],
+    scopes=scope,
+)
+
+client = gspread.authorize(creds)
+
+# Open your sheet
+sheet = client.open("Expansion Checker Data").sheet1
+
+# -------------------------------
+# INPUT SECTION
+# -------------------------------
 
 mode = st.radio(
     "Mode",
@@ -87,13 +63,13 @@ def rating_block(label, help_text, key_name):
         key=key_name
     )
 
-    st.markdown("<div class='compact-divider'></div>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin:10px 0;'>", unsafe_allow_html=True)
 
     return value
 
 baseline = rating_block(
     "Baseline",
-    "How do I feel right now? (1 = reactive | 5 = calm and clear)",
+    "How do I feel right now? (1 = reactive | 5 = energised)",
     "baseline"
 )
 
@@ -111,7 +87,7 @@ growth = rating_block(
 
 energy = rating_block(
     "⚡ Energy",
-    "Do I feel energised (not drained) thinking about engaging?",
+    "Do I feel energised (not drained)?",
     "energy"
 )
 
@@ -128,10 +104,13 @@ trajectory = rating_block(
 )
 
 over_functioning = st.checkbox("Am I over-functioning here?")
-
 notes = st.text_area("Notes (optional)")
 
 st.divider()
+
+# -------------------------------
+# SAVE ENTRY TO GOOGLE SHEETS
+# -------------------------------
 
 if st.button("Save Entry"):
     if description == "":
@@ -139,37 +118,23 @@ if st.button("Save Entry"):
     else:
         total = spark + growth + energy + agency + trajectory
 
-        entry = {
-            "date": datetime.datetime.now(),
-            "mode": mode,
-            "description": description,
-            "category": category,
-            "person": person,
-            "baseline": baseline,
-            "spark": spark,
-            "growth": growth,
-            "energy": energy,
-            "agency": agency,
-            "trajectory": trajectory,
-            "total": total,
-            "over_functioning": over_functioning,
-            "notes": notes
-        }
+        row = [
+            str(datetime.datetime.now()),
+            mode,
+            description,
+            category,
+            person,
+            baseline,
+            spark,
+            growth,
+            energy,
+            agency,
+            trajectory,
+            total,
+            over_functioning,
+            notes
+        ]
 
-        df = pd.DataFrame([entry])
+        sheet.append_row(row)
 
-        if os.path.exists(DATA_FILE):
-            df.to_csv(DATA_FILE, mode='a', header=False, index=False)
-        else:
-            df.to_csv(DATA_FILE, index=False)
-
-        st.success("Entry saved.")
-
-st.header("Trend Overview")
-
-if os.path.exists(DATA_FILE):
-    df = pd.read_csv(DATA_FILE)
-    df["date"] = pd.to_datetime(df["date"])
-    st.line_chart(df.set_index("date")["total"])
-else:
-    st.info("No entries yet.")
+        st.success("Entry saved to Google Sheets.")
