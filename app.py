@@ -5,6 +5,46 @@ import os
 
 st.set_page_config(page_title="Expansion Alignment Checker", layout="centered")
 
+# --- SPACING + CLEAN RADIO STYLE ---
+st.markdown("""
+<style>
+
+/* Remove radio circle */
+div[role="radiogroup"] input {
+    display: none;
+}
+
+/* Make radio horizontal */
+div[data-baseweb="radio"] > div {
+    flex-direction: row;
+}
+
+/* Tighten caption spacing */
+div[data-testid="stCaptionContainer"] {
+    margin-bottom: 0.2rem;
+}
+
+/* Tighten space above radio group */
+div[role="radiogroup"] {
+    margin-top: 0rem;
+    margin-bottom: 1.5rem;  /* bigger gap before next block */
+}
+
+/* Slightly enlarge numbers */
+div[role="radiogroup"] label span {
+    font-size: 20px;
+    padding: 0 10px;
+    color: black !important;
+}
+
+/* Remove radio pill background */
+div[role="radiogroup"] label {
+    background-color: transparent !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 st.title("Expansion Alignment Checker")
 st.markdown("**Does this multiply your life or maintain shrinkage?**")
 
