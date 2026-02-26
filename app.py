@@ -5,7 +5,7 @@ import os
 
 st.set_page_config(page_title="Expansion Alignment Checker", layout="centered")
 
-# --- Clean Styling + Precise Spacing ---
+# --- Compact Mobile Styling ---
 st.markdown("""
 <style>
 
@@ -19,25 +19,16 @@ div[data-baseweb="radio"] > div {
     flex-direction: row;
 }
 
-/* Remove extra spacing from markdown */
+/* Tighten all markdown spacing */
 div[data-testid="stMarkdownContainer"] p {
     margin-bottom: 0.2rem;
+    margin-top: 0.2rem;
 }
 
-/* Remove extra spacing from captions */
-div[data-testid="stCaptionContainer"] {
-    margin-bottom: 0.3rem;
-}
-
-/* Tight radio spacing */
+/* Tighten radio spacing */
 div[role="radiogroup"] {
-    margin-top: 0rem;
-    margin-bottom: 0rem;
-}
-
-/* Larger spacing AFTER each rating block */
-.block-spacer {
-    height: 1.8rem;
+    margin-top: 0.2rem;
+    margin-bottom: 0.4rem;
 }
 
 /* Clean radio labels */
@@ -46,16 +37,22 @@ div[role="radiogroup"] label {
 }
 
 div[role="radiogroup"] label span {
-    font-size: 20px;
-    padding: 0 10px;
+    font-size: 18px;
+    padding: 0 8px;
     color: black !important;
+}
+
+/* Thin divider line */
+.compact-divider {
+    border-top: 1px solid #dcdcdc;
+    margin: 0.8rem 0 0.8rem 0;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 st.title("Expansion Alignment Checker")
-st.markdown("**Does this multiply your life or maintain shrinkage?**")
+st.markdown("Does this multiply your life or maintain shrinkage?")
 
 DATA_FILE = "data.csv"
 
@@ -79,8 +76,8 @@ person = st.text_input("Person involved (if any)")
 st.divider()
 
 def rating_block(label, help_text, key_name):
-    st.markdown(f"### {label}")
-    st.caption(help_text)
+    st.markdown(f"**{label}**")
+    st.markdown(f"<span style='font-size:14px;color:#555;'>{help_text}</span>", unsafe_allow_html=True)
 
     value = st.radio(
         "",
@@ -90,8 +87,7 @@ def rating_block(label, help_text, key_name):
         key=key_name
     )
 
-    # Spacer AFTER full block
-    st.markdown('<div class="block-spacer"></div>', unsafe_allow_html=True)
+    st.markdown("<div class='compact-divider'></div>", unsafe_allow_html=True)
 
     return value
 
@@ -174,10 +170,6 @@ st.header("Trend Overview")
 if os.path.exists(DATA_FILE):
     df = pd.read_csv(DATA_FILE)
     df["date"] = pd.to_datetime(df["date"])
-
     st.line_chart(df.set_index("date")["total"])
-
-    avg_score = round(df["total"].mean(), 2)
-    st.write(f"Average Expansion Score: {avg_score}")
 else:
     st.info("No entries yet.")
