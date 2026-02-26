@@ -26,6 +26,13 @@ client = gspread.authorize(creds)
 sheet = client.open("Expansion Checker Data").sheet1
 
 # -------------------------------
+# SESSION STATE FLAG
+# -------------------------------
+
+if "saved" not in st.session_state:
+    st.session_state.saved = False
+
+# -------------------------------
 # FORM
 # -------------------------------
 
@@ -126,7 +133,7 @@ with st.form("entry_form", clear_on_submit=True):
     submitted = st.form_submit_button("Save Entry")
 
 # -------------------------------
-# SAVE TO GOOGLE SHEETS
+# SAVE LOGIC
 # -------------------------------
 
 if submitted:
@@ -155,4 +162,12 @@ if submitted:
 
         sheet.append_row(row)
 
-st.success("Entry saved.")
+        st.session_state.saved = True
+        st.rerun()
+
+# -------------------------------
+# POST-RERUN CLEAN STATE
+# -------------------------------
+
+if st.session_state.saved:
+    st.session_state.saved = False
