@@ -5,16 +5,14 @@ from google.oauth2.service_account import Credentials
 
 st.set_page_config(page_title="Expansion Alignment Checker", layout="centered")
 
-# -------------------------------
-# SESSION STATE
-# -------------------------------
-
-if "just_saved" not in st.session_state:
-    st.session_state.just_saved = False
+st.title("Expansion Alignment Checker")
+st.markdown("Does this multiply your life or maintain shrinkage?")
 
 # -------------------------------
-# GOOGLE SHEETS CONNECTION
+# GOOGLE SHEETS CONNECTION (STABLE BY KEY)
 # -------------------------------
+
+SHEET_ID = "1I39H1UHFU5ebE-NiTxK-EwJqCB7N6vHY0bKErJN7ibA"
 
 scope = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -27,18 +25,7 @@ creds = Credentials.from_service_account_info(
 )
 
 client = gspread.authorize(creds)
-sheet = client.open("Expansion Checker Data").sheet1
-
-# -------------------------------
-# SUCCESS MESSAGE (TOP OF PAGE)
-# -------------------------------
-
-if st.session_state.just_saved:
-    st.success("Entry saved.")
-    st.session_state.just_saved = False
-
-st.title("Expansion Alignment Checker")
-st.markdown("Does this multiply your life or maintain shrinkage?")
+sheet = client.open_by_key(SHEET_ID).sheet1
 
 # -------------------------------
 # FORM
@@ -170,5 +157,4 @@ if submitted:
 
         sheet.append_row(row)
 
-        st.session_state.just_saved = True
-        st.rerun()
+        st.success("Entry saved.")
