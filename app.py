@@ -5,6 +5,9 @@ from google.oauth2.service_account import Credentials
 
 st.set_page_config(page_title="Expansion Alignment Checker", layout="centered")
 
+# Invisible top anchor for mobile scroll
+st.markdown('<div id="top-anchor"></div>', unsafe_allow_html=True)
+
 # -------------------------------
 # SESSION STATE INITIALISATION
 # -------------------------------
@@ -13,7 +16,7 @@ if "saved_flag" not in st.session_state:
     st.session_state.saved_flag = False
 
 # -------------------------------
-# GOOGLE SHEETS CONNECTION (BY ID)
+# GOOGLE SHEETS CONNECTION
 # -------------------------------
 
 SHEET_ID = "1I39H1UHFU5ebE-NiTxK-EwJqCB7N6vHY0bKErJN7ibA"
@@ -32,17 +35,20 @@ client = gspread.authorize(creds)
 sheet = client.open_by_key(SHEET_ID).sheet1
 
 # -------------------------------
-# SUCCESS MESSAGE + SCROLL RESET
+# SUCCESS MESSAGE + MOBILE SCROLL
 # -------------------------------
 
 if st.session_state.saved_flag:
     st.success("Entry saved.")
 
-    # Force scroll to top
+    # Mobile-safe scroll to top anchor
     st.markdown(
         """
         <script>
-            window.scrollTo(0, 0);
+            const anchor = document.getElementById("top-anchor");
+            if (anchor) {
+                anchor.scrollIntoView({behavior: "instant"});
+            }
         </script>
         """,
         unsafe_allow_html=True
@@ -51,7 +57,7 @@ if st.session_state.saved_flag:
     st.session_state.saved_flag = False
 
 # -------------------------------
-# PAGE HEADER
+# HEADER
 # -------------------------------
 
 st.title("Expansion Alignment Checker")
